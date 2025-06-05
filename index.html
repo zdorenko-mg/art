@@ -181,7 +181,7 @@
         <!-- Home Section -->
         <section id="home" class="section active h-full relative">
             <div class="h-full bg-black p-6">
-                <!-- Welcome Block (non-absolute) -->
+                <!-- Welcome Block -->
                 <div class="welcome-block">
                     <h1 class="text-2xl font-bold mb-3 text-white">Радий вітати в своїй студії!</h1>
                     <p class="text-gray-200 leading-relaxed mb-4">
@@ -608,17 +608,17 @@
 
     <script>
         // Portfolio data
-        var portfolioImages = [
+        const portfolioImages = [
             { id: 1, category: 'portrait', src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1200&h=800&fit=crop', title: 'Елегантний портрет', price: 50, description: 'Професійний портрет у студії з м\'яким освітленням' },
             { id: 2, category: 'wedding', src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop', title: 'Весільна церемонія', price: 75, description: 'Чарівний момент весільної церемонії' },
             { id: 3, category: 'nature', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop', title: 'Гірський пейзаж', price: 40, description: 'Захоплюючий вид на гірські вершини' },
             { id: 4, category: 'portrait', src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop', title: 'Художній портрет', price: 60, description: 'Креативний портрет з художнім освітленням' },
             { id: 5, category: 'wedding', src: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&h=800&fit=crop', title: 'Весільні емоції', price: 65, description: 'Щирі емоції молодят у день весілля' },
-            { id: 6, category: 'nature', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop', title: 'Лісова стежка', price: 35, description: 'Таємнича стежка крізь густий ліс' }
+            { id: 6, category: 'nature', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop', title: 'Лісова стежка', price: 35, description: 'Таємнича стежка крізь густий ліс' },
         ];
 
         // Home gallery images
-        var homeImages = [
+        const homeImages = [
             'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop',
             'https://images.unsplash.com/photo-1519741497674-611481863552?w=300&h=200&fit=crop',
             'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=450&fit=crop',
@@ -642,11 +642,11 @@
             'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=250&fit=crop',
             'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop',
             'https://images.unsplash.com/photo-1493612276216-ee3925520721?w=300&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?w=300&h=350&fit=crop'
+            'https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?w=300&h=350&fit=crop',
         ];
 
-        // Bio gallery images (8 images as requested)
-        var bioImages = [
+        // Bio gallery images (8 images)
+        const bioImages = [
             'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=400&fit=crop',
             'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=250&fit=crop',
             'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=350&fit=crop',
@@ -657,166 +657,120 @@
             'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop'
         ];
 
-        var currentPortfolioIndex = 0;
-        var currentFilter = 'all';
-        var cart = [];
-        var filteredImages = portfolioImages.slice();
+        let currentPortfolioIndex = 0;
+        let currentFilter = 'all';
+        let cart = [];
+        let filteredImages = [...portfolioImages];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-                renderHomeGallery();
-                renderBioGallery();
-                renderThumbnails();
-                updateImageInfo();
-                setupModalCloseEvents();
-                setupKeyboardEvents();
-            }, 100);
+            lucide.createIcons();
+            renderHomeGallery();
+            renderBioGallery();
+            renderThumbnails();
+            updateImageInfo();
         });
 
         // Render home gallery
         function renderHomeGallery() {
-            var grid = document.querySelector('.masonry-grid');
-            if (!grid) return;
+            const grid = document.querySelector('.masonry-grid');
             
-            for (var i = 0; i < homeImages.length; i++) {
-                var heights = [200, 250, 300, 350, 400, 450];
-                var randomHeight = heights[Math.floor(Math.random() * heights.length)];
+            homeImages.forEach((src, index) => {
+                const heights = [200, 250, 300, 350, 400, 450];
+                const randomHeight = heights[Math.floor(Math.random() * heights.length)];
                 
-                var img = document.createElement('img');
-                img.src = homeImages[i];
-                img.alt = 'Gallery ' + (i + 1);
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Gallery ${index + 1}`;
                 img.className = 'masonry-item w-full object-cover';
                 img.style.height = randomHeight + 'px';
-                img.setAttribute('data-index', i);
-                img.onclick = function() {
-                    openHomeModal(parseInt(this.getAttribute('data-index')));
-                };
+                img.onclick = () => openHomeModal(index);
                 
                 grid.appendChild(img);
-            }
+            });
         }
 
         // Render bio gallery
         function renderBioGallery() {
-            var grid = document.querySelector('.bio-masonry-grid');
-            if (!grid) return;
+            const grid = document.querySelector('.bio-masonry-grid');
             
-            for (var i = 0; i < bioImages.length; i++) {
-                var heights = [200, 250, 300, 350, 400];
-                var randomHeight = heights[Math.floor(Math.random() * heights.length)];
+            bioImages.forEach((src, index) => {
+                const heights = [200, 250, 300, 350, 400];
+                const randomHeight = heights[Math.floor(Math.random() * heights.length)];
                 
-                var img = document.createElement('img');
-                img.src = bioImages[i];
-                img.alt = 'Bio ' + (i + 1);
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Bio ${index + 1}`;
                 img.className = 'masonry-item w-full object-cover cursor-pointer hover:scale-105 transition-transform';
                 img.style.height = randomHeight + 'px';
-                img.setAttribute('data-index', i);
-                img.onclick = function() {
-                    openBioModal(parseInt(this.getAttribute('data-index')));
-                };
+                img.onclick = () => openBioModal(index);
                 
                 grid.appendChild(img);
-            }
+            });
         }
 
         // Navigation
         function showSection(sectionName) {
-            var sections = document.querySelectorAll('.section');
-            for (var i = 0; i < sections.length; i++) {
-                sections[i].classList.remove('active');
-            }
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName).classList.add('active');
             
-            var targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-            
-            var navBtns = document.querySelectorAll('.nav-btn');
-            for (var i = 0; i < navBtns.length; i++) {
-                navBtns[i].classList.remove('active');
-            }
-            
-            var activeBtn = document.querySelector('[data-section="' + sectionName + '"]');
-            if (activeBtn) {
-                activeBtn.classList.add('active');
-            }
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
         }
 
         // Portfolio functions
         function filterPortfolio(category) {
             currentFilter = category;
-            filteredImages = category === 'all' ? portfolioImages.slice() : portfolioImages.filter(function(img) {
-                return img.category === category;
-            });
+            filteredImages = category === 'all' ? [...portfolioImages] : portfolioImages.filter(img => img.category === category);
             currentPortfolioIndex = 0;
             
-            var filters = document.querySelectorAll('.portfolio-filter');
-            for (var i = 0; i < filters.length; i++) {
-                filters[i].classList.remove('active-filter');
-                filters[i].classList.add('border-gray-600');
-            }
-            
-            if (event && event.target) {
-                event.target.classList.add('active-filter');
-                event.target.classList.remove('border-gray-600');
-            }
+            document.querySelectorAll('.portfolio-filter').forEach(btn => {
+                btn.classList.remove('active-filter');
+                btn.classList.add('border-gray-600');
+            });
+            event.target.classList.add('active-filter');
+            event.target.classList.remove('border-gray-600');
             
             renderThumbnails();
             updateImageInfo();
         }
 
         function renderThumbnails() {
-            var carousel = document.getElementById('thumbnail-carousel');
-            if (!carousel) return;
-            
-            var html = '';
-            for (var i = 0; i < filteredImages.length; i++) {
-                var activeClass = i === currentPortfolioIndex ? 'active' : '';
-                html += '<img src="' + filteredImages[i].src + '" ' +
-                       'alt="' + filteredImages[i].title + '" ' +
-                       'class="thumbnail w-16 h-12 object-cover ' + activeClass + '" ' +
-                       'onclick="selectImage(' + i + ')">';
-            }
-            carousel.innerHTML = html;
+            const carousel = document.getElementById('thumbnail-carousel');
+            carousel.innerHTML = filteredImages.map((image, index) => `
+                <img src="${image.src}" 
+                     alt="${image.title}"
+                     class="thumbnail w-16 h-12 object-cover ${index === currentPortfolioIndex ? 'active' : ''}"
+                     onclick="selectImage(${index})">
+            `).join('');
         }
 
         function selectImage(index) {
             currentPortfolioIndex = index;
             updateImageInfo();
             
-            var thumbs = document.querySelectorAll('.thumbnail');
-            for (var i = 0; i < thumbs.length; i++) {
-                if (i === index) {
-                    thumbs[i].classList.add('active');
-                } else {
-                    thumbs[i].classList.remove('active');
-                }
-            }
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
         }
 
         function updateImageInfo() {
-            var currentImage = filteredImages[currentPortfolioIndex];
+            const currentImage = filteredImages[currentPortfolioIndex];
             if (!currentImage) return;
             
-            var mainImg = document.getElementById('main-portfolio-image');
-            var title = document.getElementById('image-title');
-            var description = document.getElementById('image-description');
-            var price = document.getElementById('image-price');
-            var category = document.getElementById('image-category');
-            
-            if (mainImg) mainImg.src = currentImage.src;
-            if (title) title.textContent = currentImage.title;
-            if (description) description.textContent = currentImage.description;
-            if (price) price.textContent = ' + currentImage.price;
-            if (category) category.textContent = getCategoryName(currentImage.category);
+            document.getElementById('main-portfolio-image').src = currentImage.src;
+            document.getElementById('image-title').textContent = currentImage.title;
+            document.getElementById('image-description').textContent = currentImage.description;
+            document.getElementById('image-price').textContent = `${currentImage.price}`;
+            document.getElementById('image-category').textContent = getCategoryName(currentImage.category);
         }
 
         function getCategoryName(category) {
-            var names = {
+            const names = {
                 'portrait': 'Портрет',
                 'wedding': 'Весілля',
                 'nature': 'Природа'
@@ -832,161 +786,136 @@
             }
         }
 
-        // Modal functions
+        // Home modal functions
         function openHomeModal(index) {
-            var modal = document.getElementById('home-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                var modalImg = document.getElementById('home-modal-image');
-                if (modalImg) modalImg.src = homeImages[index];
-                
-                var thumbnailsContainer = document.getElementById('home-modal-thumbnails');
-                if (thumbnailsContainer) {
-                    var html = '';
-                    for (var i = 0; i < homeImages.length; i++) {
-                        var borderClass = i === index ? 'border-2 border-white' : '';
-                        html += '<img src="' + homeImages[i] + '" ' +
-                               'alt="Home ' + (i + 1) + '" ' +
-                               'class="w-16 h-12 object-cover cursor-pointer m-1 ' + borderClass + '" ' +
-                               'onclick="changeHomeModalImage(' + i + ')">';
-                    }
-                    thumbnailsContainer.innerHTML = html;
-                }
-            }
+            document.getElementById('home-modal').classList.remove('hidden');
+            document.getElementById('home-modal-image').src = homeImages[index];
+            
+            const thumbnailsContainer = document.getElementById('home-modal-thumbnails');
+            thumbnailsContainer.innerHTML = homeImages.map((src, i) => `
+                <img src="${src}" 
+                     alt="Home ${i + 1}"
+                     class="w-16 h-12 object-cover cursor-pointer m-1 ${i === index ? 'border-2 border-white' : ''}"
+                     onclick="changeHomeModalImage(${i})">
+            `).join('');
         }
 
         function changeHomeModalImage(index) {
-            var modalImg = document.getElementById('home-modal-image');
-            if (modalImg) modalImg.src = homeImages[index];
+            document.getElementById('home-modal-image').src = homeImages[index];
             
-            var thumbs = document.querySelectorAll('#home-modal-thumbnails img');
-            for (var i = 0; i < thumbs.length; i++) {
+            document.querySelectorAll('#home-modal-thumbnails img').forEach((thumb, i) => {
                 if (i === index) {
-                    thumbs[i].classList.add('border-2', 'border-white');
+                    thumb.classList.add('border-2', 'border-white');
                 } else {
-                    thumbs[i].classList.remove('border-2', 'border-white');
+                    thumb.classList.remove('border-2', 'border-white');
                 }
-            }
+            });
         }
 
         function closeHomeModal() {
-            var modal = document.getElementById('home-modal');
-            if (modal) modal.classList.add('hidden');
+            document.getElementById('home-modal').classList.add('hidden');
         }
 
+        // Bio modal functions
         function openBioModal(index) {
-            var modal = document.getElementById('bio-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                var modalImg = document.getElementById('bio-modal-image');
-                if (modalImg) modalImg.src = bioImages[index];
-                
-                var thumbnailsContainer = document.getElementById('bio-modal-thumbnails');
-                if (thumbnailsContainer) {
-                    var html = '';
-                    for (var i = 0; i < bioImages.length; i++) {
-                        var borderClass = i === index ? 'border-2 border-white' : '';
-                        html += '<img src="' + bioImages[i] + '" ' +
-                               'alt="Bio ' + (i + 1) + '" ' +
-                               'class="w-16 h-12 object-cover cursor-pointer m-1 ' + borderClass + '" ' +
-                               'onclick="changeBioModalImage(' + i + ')">';
-                    }
-                    thumbnailsContainer.innerHTML = html;
-                }
-            }
+            document.getElementById('bio-modal').classList.remove('hidden');
+            document.getElementById('bio-modal-image').src = bioImages[index];
+            
+            const thumbnailsContainer = document.getElementById('bio-modal-thumbnails');
+            thumbnailsContainer.innerHTML = bioImages.map((src, i) => `
+                <img src="${src}" 
+                     alt="Bio ${i + 1}"
+                     class="w-16 h-12 object-cover cursor-pointer m-1 ${i === index ? 'border-2 border-white' : ''}"
+                     onclick="changeBioModalImage(${i})">
+            `).join('');
         }
 
         function changeBioModalImage(index) {
-            var modalImg = document.getElementById('bio-modal-image');
-            if (modalImg) modalImg.src = bioImages[index];
+            document.getElementById('bio-modal-image').src = bioImages[index];
             
-            var thumbs = document.querySelectorAll('#bio-modal-thumbnails img');
-            for (var i = 0; i < thumbs.length; i++) {
+            document.querySelectorAll('#bio-modal-thumbnails img').forEach((thumb, i) => {
                 if (i === index) {
-                    thumbs[i].classList.add('border-2', 'border-white');
+                    thumb.classList.add('border-2', 'border-white');
                 } else {
-                    thumbs[i].classList.remove('border-2', 'border-white');
+                    thumb.classList.remove('border-2', 'border-white');
                 }
-            }
+            });
         }
 
         function closeBioModal() {
-            var modal = document.getElementById('bio-modal');
-            if (modal) modal.classList.add('hidden');
+            document.getElementById('bio-modal').classList.add('hidden');
         }
 
+        // Portfolio modal functions
         function openPortfolioModal() {
-            var currentImage = filteredImages[currentPortfolioIndex];
-            var modal = document.getElementById('portfolio-modal');
-            if (modal && currentImage) {
-                modal.classList.remove('hidden');
-                var modalImg = document.getElementById('portfolio-modal-image');
-                var modalTitle = document.getElementById('portfolio-modal-title');
-                var modalPrice = document.getElementById('portfolio-modal-price');
-                
-                if (modalImg) modalImg.src = currentImage.src;
-                if (modalTitle) modalTitle.textContent = currentImage.title;
-                if (modalPrice) modalPrice.textContent = ' + currentImage.price;
-            }
+            const currentImage = filteredImages[currentPortfolioIndex];
+            document.getElementById('portfolio-modal').classList.remove('hidden');
+            document.getElementById('portfolio-modal-image').src = currentImage.src;
+            document.getElementById('portfolio-modal-title').textContent = currentImage.title;
+            document.getElementById('portfolio-modal-price').textContent = `${currentImage.price}`;
+            
+            // Add thumbnails like in home modal
+            const thumbnailsContainer = document.getElementById('portfolio-modal-thumbnails');
+            thumbnailsContainer.innerHTML = filteredImages.map((image, i) => `
+                <img src="${image.src}" 
+                     alt="${image.title}"
+                     class="w-16 h-12 object-cover cursor-pointer m-1 ${i === currentPortfolioIndex ? 'border-2 border-white' : ''}"
+                     onclick="changePortfolioModalImage(${i})">
+            `).join('');
+        }
+
+        function changePortfolioModalImage(index) {
+            currentPortfolioIndex = index;
+            const currentImage = filteredImages[index];
+            
+            document.getElementById('portfolio-modal-image').src = currentImage.src;
+            document.getElementById('portfolio-modal-title').textContent = currentImage.title;
+            document.getElementById('portfolio-modal-price').textContent = `${currentImage.price}`;
+            
+            document.querySelectorAll('#portfolio-modal-thumbnails img').forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('border-2', 'border-white');
+                } else {
+                    thumb.classList.remove('border-2', 'border-white');
+                }
+            });
+            
+            // Update main portfolio image and thumbnails
+            updateImageInfo();
+            renderThumbnails();
         }
 
         function closePortfolioModal() {
-            var modal = document.getElementById('portfolio-modal');
-            if (modal) modal.classList.add('hidden');
+            document.getElementById('portfolio-modal').classList.add('hidden');
         }
 
         // Cart functions
         function addCurrentToCart() {
-            var currentImage = filteredImages[currentPortfolioIndex];
-            if (!currentImage) return;
-            
-            var existingItem = null;
-            for (var i = 0; i < cart.length; i++) {
-                if (cart[i].id === currentImage.id) {
-                    existingItem = cart[i];
-                    break;
-                }
-            }
+            const currentImage = filteredImages[currentPortfolioIndex];
+            const existingItem = cart.find(item => item.id === currentImage.id);
             
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
-                var newItem = {
-                    id: currentImage.id,
-                    category: currentImage.category,
-                    src: currentImage.src,
-                    title: currentImage.title,
-                    price: currentImage.price,
-                    description: currentImage.description,
-                    quantity: 1
-                };
-                cart.push(newItem);
+                cart.push({ ...currentImage, quantity: 1 });
             }
             
             updateCartDisplay();
             
             // Visual feedback
-            if (event && event.target) {
-                var button = event.target;
-                var originalHTML = button.innerHTML;
-                button.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i>';
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-                
-                setTimeout(function() {
-                    button.innerHTML = originalHTML;
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
-                }, 1000);
-            }
+            const button = event.target;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i>';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                lucide.createIcons();
+            }, 1000);
         }
 
         function removeFromCart(imageId) {
-            cart = cart.filter(function(item) {
-                return item.id !== imageId;
-            });
+            cart = cart.filter(item => item.id !== imageId);
             updateCartDisplay();
         }
 
@@ -994,41 +923,32 @@
             if (newQuantity === 0) {
                 removeFromCart(imageId);
             } else {
-                for (var i = 0; i < cart.length; i++) {
-                    if (cart[i].id === imageId) {
-                        cart[i].quantity = newQuantity;
-                        updateCartDisplay();
-                        break;
-                    }
+                const item = cart.find(item => item.id === imageId);
+                if (item) {
+                    item.quantity = newQuantity;
+                    updateCartDisplay();
                 }
             }
         }
 
         function updateCartDisplay() {
-            var cartCount = document.getElementById('cart-count');
-            var totalItems = 0;
-            for (var i = 0; i < cart.length; i++) {
-                totalItems += cart[i].quantity;
-            }
+            const cartCount = document.getElementById('cart-count');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             
-            if (cartCount) {
-                if (totalItems > 0) {
-                    cartCount.textContent = totalItems;
-                    cartCount.classList.remove('hidden');
-                } else {
-                    cartCount.classList.add('hidden');
-                }
+            if (totalItems > 0) {
+                cartCount.textContent = totalItems;
+                cartCount.classList.remove('hidden');
+            } else {
+                cartCount.classList.add('hidden');
             }
             
             renderCartItems();
         }
 
         function renderCartItems() {
-            var cartItemsContainer = document.getElementById('cart-items');
-            var emptyCart = document.getElementById('empty-cart');
-            var cartFooter = document.getElementById('cart-footer');
-            
-            if (!cartItemsContainer || !emptyCart || !cartFooter) return;
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyCart = document.getElementById('empty-cart');
+            const cartFooter = document.getElementById('cart-footer');
             
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '';
@@ -1038,129 +958,86 @@
                 emptyCart.classList.add('hidden');
                 cartFooter.classList.remove('hidden');
                 
-                var totalPrice = 0;
-                for (var i = 0; i < cart.length; i++) {
-                    totalPrice += cart[i].price * cart[i].quantity;
-                }
+                const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                document.getElementById('cart-total').textContent = `${totalPrice}`;
                 
-                var cartTotal = document.getElementById('cart-total');
-                if (cartTotal) cartTotal.textContent = ' + totalPrice;
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex items-center space-x-4 p-4 border-b border-gray-800 last:border-b-0">
+                        <img src="${item.src}" alt="${item.title}" class="w-16 h-12 object-cover">
+                        <div class="flex-1">
+                            <h4 class="font-semibold">${item.title}</h4>
+                            <p class="text-sm text-gray-400">${item.price}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" 
+                                    class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">
+                                <i data-lucide="minus" class="w-4 h-4"></i>
+                            </button>
+                            <span class="w-8 text-center">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" 
+                                    class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" 
+                                class="text-red-400 hover:text-red-300 p-2">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `).join('');
                 
-                var html = '';
-                for (var i = 0; i < cart.length; i++) {
-                    var item = cart[i];
-                    html += '<div class="flex items-center space-x-4 p-4 border-b border-gray-800 last:border-b-0">' +
-                           '<img src="' + item.src + '" alt="' + item.title + '" class="w-16 h-12 object-cover">' +
-                           '<div class="flex-1">' +
-                           '<h4 class="font-semibold">' + item.title + '</h4>' +
-                           '<p class="text-sm text-gray-400"> + item.price + '</p>' +
-                           '</div>' +
-                           '<div class="flex items-center space-x-2">' +
-                           '<button onclick="updateQuantity(' + item.id + ', ' + (item.quantity - 1) + ')" ' +
-                           'class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">' +
-                           '<i data-lucide="minus" class="w-4 h-4"></i>' +
-                           '</button>' +
-                           '<span class="w-8 text-center">' + item.quantity + '</span>' +
-                           '<button onclick="updateQuantity(' + item.id + ', ' + (item.quantity + 1) + ')" ' +
-                           'class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">' +
-                           '<i data-lucide="plus" class="w-4 h-4"></i>' +
-                           '</button>' +
-                           '</div>' +
-                           '<button onclick="removeFromCart(' + item.id + ')" ' +
-                           'class="text-red-400 hover:text-red-300 p-2">' +
-                           '<i data-lucide="trash-2" class="w-4 h-4"></i>' +
-                           '</button>' +
-                           '</div>';
-                }
-                
-                cartItemsContainer.innerHTML = html;
-                
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
+                lucide.createIcons();
             }
         }
 
         function toggleCart() {
-            var modal = document.getElementById('cart-modal');
-            if (modal) {
-                modal.classList.toggle('hidden');
-            }
+            document.getElementById('cart-modal').classList.toggle('hidden');
         }
 
         // Close modals when clicking outside
-        function setupModalCloseEvents() {
-            var bioModal = document.getElementById('bio-modal');
-            if (bioModal) {
-                bioModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeBioModal();
-                    }
-                });
+        document.getElementById('bio-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBioModal();
             }
+        });
 
-            var homeModal = document.getElementById('home-modal');
-            if (homeModal) {
-                homeModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeHomeModal();
-                    }
-                });
+        document.getElementById('home-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHomeModal();
             }
+        });
 
-            var portfolioModal = document.getElementById('portfolio-modal');
-            if (portfolioModal) {
-                portfolioModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closePortfolioModal();
-                    }
-                });
+        document.getElementById('portfolio-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePortfolioModal();
             }
+        });
 
-            var cartModal = document.getElementById('cart-modal');
-            if (cartModal) {
-                cartModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        toggleCart();
-                    }
-                });
+        document.getElementById('cart-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleCart();
             }
-        }
+        });
 
         // Keyboard navigation
-        function setupKeyboardEvents() {
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeBioModal();
-                    closeHomeModal();
-                    closePortfolioModal();
-                    var cartModal = document.getElementById('cart-modal');
-                    if (cartModal && !cartModal.classList.contains('hidden')) {
-                        toggleCart();
-                    }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBioModal();
+                closeHomeModal();
+                closePortfolioModal();
+                if (!document.getElementById('cart-modal').classList.contains('hidden')) {
+                    toggleCart();
                 }
-                
-                var portfolioSection = document.getElementById('portfolio');
-                if (portfolioSection && portfolioSection.classList.contains('active')) {
-                    if (e.key === 'ArrowLeft') {
-                        scrollCarousel('left');
-                    } else if (e.key === 'ArrowRight') {
-                        scrollCarousel('right');
-                    }
+            }
+            
+            if (document.getElementById('portfolio').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') {
+                    scrollCarousel('left');
+                } else if (e.key === 'ArrowRight') {
+                    scrollCarousel('right');
                 }
-            });
-        }
-
-        // Initialize event listeners when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setupModalCloseEvents();
-                setupKeyboardEvents();
-            });
-        } else {
-            setupModalCloseEvents();
-            setupKeyboardEvents();
-        }
+            }
+        });
     </script>
 </body>
 </html>
