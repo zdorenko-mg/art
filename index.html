@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoArt Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+        }
+        .section { 
+            display: none; 
+        }
+        .section.active { 
+            display: block; 
+        }
+        .left-column {
+            width: 70%;
+        }
+        .right-column {
+            width: 30%;
+        }
+        .thumbnail {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .thumbnail:hover {
+            transform: scale(1.1);
+        }
+        .thumbnail.active {
+            border: 2px solid white;
+            transform: scale(1.05);
+        }
+        .active-filter {
+            background-color: white !important;
+            color: black !important;
+            border-color: white !important;
+        }
+        /* Masonry grid styles */
+        .masonry-grid {
+            column-count: 6;
+            column-gap: 8px;
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .masonry-item:hover {
+            transform: scale(1.02);
+        }
+        .bio-masonry-grid {
+            column-count: 3;
+            column-gap: 12px;
+        }
+        
+        /* Welcome block styles */
+        .welcome-block {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        
+        .bio-welcome-block {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 750px;
+            margin: 20px 0;
+        }
+        
+        /* Navigation styles */
+        .nav-btn {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-btn:hover::after {
+            width: 100%;
+        }
+        
+        .nav-btn.active {
+            color: #9CA3AF !important;
+        }
+        
+        .nav-btn.active::after {
+            width: 100%;
+            background-color: #9CA3AF;
+        }
+        
+        .contact-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.05em;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+        
+        .contact-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: width 0.3s ease;
+        }
+        
+        .contact-link:hover {
+            color: #D1D5DB;
+        }
+        
+        .contact-link:hover::after {
+            width: 100%;
+        }
+        
+        @media (max-width: 1024px) {
+            .masonry-grid { column-count: 4; }
+            .bio-masonry-grid { column-count: 2; }
+        }
+        @media (max-width: 768px) {
+            .masonry-grid { column-count: 3; }
+            .bio-masonry-grid { column-count: 1; }
+        }
+    </style>
+</head>
+<body class="bg-black text-white h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-black border-b border-gray-800 p-4">
+        <div class="flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <i data-lucide="camera" class="w-8 h-8 text-white"></i>
+                <span class="text-xl font-bold">PhotoArt Studio</span>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="flex items-center space-x-8">
+                <button onclick="showSection('home')" class="nav-btn text-white hover:text-gray-300 transition-colors font-bold text-sm tracking-wider active" data-section="home">ГОЛОВНА</button>
+                <button onclick="showSection('bio')" class="nav-btn text-white hover:text-gray-300 transition-colors font-bold text-sm tracking-wider" data-section="bio">БІО</button>
+                <button onclick="showSection('portfolio')" class="nav-btn text-white hover:text-gray-300 transition-colors font-bold text-sm tracking-wider" data-section="portfolio">ПОРТФОЛІО</button>
+                <button onclick="showSection('contact')" class="nav-btn text-white hover:text-gray-300 transition-colors font-bold text-sm tracking-wider" data-section="contact">КОНТАКТИ</button>
+                
+                <!-- Cart -->
+                <button onclick="toggleCart()" class="relative text-white hover:text-gray-300 transition-colors">
+                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-hidden">
+        
+        <!-- Home Section -->
+        <section id="home" class="section active h-full relative">
+            <div class="h-full bg-black p-6">
+                <!-- Welcome Block (non-absolute) -->
+                <div class="welcome-block">
+                    <h1 class="text-2xl font-bold mb-3 text-white">Радий вітати в своїй студії!</h1>
+                    <p class="text-gray-200 leading-relaxed mb-4">
+                        Вітаю вас в PhotoArt Studio - місці, де народжуються неповторні моменти. 
+                        Ось мої останні роботи, які ви можете переглянути детальніше.
+                    </p>
+                    <p class="text-gray-300 text-sm">
+                        В розділі портфоліо ви зможете купити зацікавлені роботи та зберегти ці спогади назавжди.
+                    </p>
+                </div>
+                
+                <div class="masonry-grid" style="height: calc(100% - 200px);">
+                    <!-- Portfolio images will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Bio Section -->
+        <section id="bio" class="section h-full">
+            <div class="h-full flex bg-black">
+                <!-- Left Column (60%) -->
+                <div class="w-3/5 bg-black p-6">
+                    <!-- Bio Welcome Block -->
+                    <div class="bio-welcome-block">
+                        <h1 class="text-3xl font-bold mb-6">Про мене</h1>
+                        
+                        <div class="space-y-4 text-gray-300 leading-relaxed text-sm">
+                            <p>
+                                Привіт! Мене звати Олександр, і я професійний фотограф з понад восьмирічним досвідом. 
+                                Моя пристрасть до фотографії почалася ще в дитинстві, коли я вперше взяв в руки старенький фотоапарат свого діда.
+                            </p>
+                            
+                            <p>
+                                Протягом років я вивчав різні стилі та техніки фотографії, від класичного портрету до сучасної художньої фотографії. 
+                                Мій стиль формувався під впливом великих майстрів, але завжди залишався унікальним та особистим.
+                            </p>
+                            
+                            <blockquote class="border-l-4 border-gray-600 pl-4 italic my-4">
+                                "Моя мета — не просто зробити фотографію, а розповісти історію, 
+                                яка торкнеться серця і залишиться в пам'яті назавжди."
+                            </blockquote>
+                            
+                            <p>
+                                Я закінчив Київський інститут мистецтв за спеціальністю "Візуальні мистецтва", 
+                                де здобув глибокі теоретичні знання та практичні навички.
+                            </p>
+                            
+                            <p>
+                                Готові створити щось неповторне разом? 
+                                <a href="#" onclick="showSection('contact')" class="contact-link">Зв'язатися зі мною</a>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Bio Photo Gallery -->
+                    <div class="bio-masonry-grid" style="height: calc(100% - 400px);">
+                        <!-- Bio images will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section id="portfolio" class="section h-full">
+            <div class="h-full flex flex-col bg-black">
+                <!-- Main Content Area -->
+                <div class="flex flex-1" style="height: calc(100vh - 160px);">
+                    <!-- Left Column (70%) -->
+                    <div class="left-column bg-black flex items-center justify-center relative">
+                        <img id="main-portfolio-image" 
+                             src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1200&h=800&fit=crop" 
+                             alt="Portfolio Image" 
+                             class="w-full h-full object-cover cursor-pointer"
+                             onclick="openPortfolioModal()">
+                        
+                        <!-- Cart Button (only on portfolio) -->
+                        <button onclick="addCurrentToCart()" 
+                                class="absolute bottom-6 right-6 bg-white text-black p-3 rounded-full hover:bg-gray-200 transition-colors">
+                            <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Right Column (30%) -->
+                    <div class="right-column bg-black p-8">
+                        <h2 class="text-2xl font-bold mb-6">Категорії</h2>
+                        
+                        <!-- Category Filters -->
+                        <div class="space-y-3 mb-8">
+                            <button onclick="filterPortfolio('all')" 
+                                    class="portfolio-filter block w-full text-left p-3 rounded border border-gray-600 hover:border-white transition-colors active-filter">
+                                Всі роботи
+                            </button>
+                            <button onclick="filterPortfolio('portrait')" 
+                                    class="portfolio-filter block w-full text-left p-3 rounded border border-gray-600 hover:border-white transition-colors">
+                                Портрети
+                            </button>
+                            <button onclick="filterPortfolio('wedding')" 
+                                    class="portfolio-filter block w-full text-left p-3 rounded border border-gray-600 hover:border-white transition-colors">
+                                Весілля
+                            </button>
+                            <button onclick="filterPortfolio('nature')" 
+                                    class="portfolio-filter block w-full text-left p-3 rounded border border-gray-600 hover:border-white transition-colors">
+                                Природа
+                            </button>
+                        </div>
+                        
+                        <!-- Current Image Info -->
+                        <div id="image-info" class="border-t border-gray-800 pt-6">
+                            <h3 id="image-title" class="text-lg font-semibold mb-2">Елегантний портрет</h3>
+                            <p id="image-description" class="text-gray-300 text-sm mb-4">
+                                Професійний портрет у студії з м'яким освітленням
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <span id="image-price" class="text-xl font-bold">$50</span>
+                                <span id="image-category" class="text-sm text-gray-400">Портрет</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bottom Carousel -->
+                <div class="h-20 bg-black border-t border-gray-800 p-3">
+                    <div class="flex items-center justify-between h-full">
+                        <button onclick="scrollCarousel('left')" class="text-white hover:text-gray-300">
+                            <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                        </button>
+                        
+                        <div id="thumbnail-carousel" class="flex space-x-2 overflow-hidden flex-1 mx-4">
+                            <!-- Thumbnails will be populated by JavaScript -->
+                        </div>
+                        
+                        <button onclick="scrollCarousel('right')" class="text-white hover:text-gray-300">
+                            <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section h-full">
+            <div class="h-full flex bg-black">
+                <!-- Left Column (70%) -->
+                <div class="left-column bg-black p-8">
+                    <div class="welcome-block">
+                        <h2 class="text-3xl font-bold mb-8">Зв'яжіться зі мною</h2>
+                        <p class="text-gray-200 leading-relaxed mb-4">
+                            Вітаю вас в PhotoArt Studio - місці, де народжуються неповторні моменти. 
+                            Ось мої останні роботи, які ви можете переглянути детальніше.
+                        </p>
+                        <p class="text-gray-300 text-sm">
+                            В розділі портфоліо ви зможете купити зацікавлені роботи та зберегти ці спогади назавжди.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                        <!-- Map -->
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Де мене знайти</h3>
+                            <div class="bg-gray-800 h-64 rounded flex items-center justify-center">
+                                <div class="text-center text-gray-400">
+                                    <i data-lucide="map-pin" class="w-12 h-12 mx-auto mb-2"></i>
+                                    <p>Київ, Україна</p>
+                                    <p class="text-sm">вул. Хрещатик, 1</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Form -->
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Форма зворотного зв'язку</h3>
+                            <div class="space-y-4">
+                                <input type="text" placeholder="Ваше ім'я" 
+                                       class="w-full bg-black border border-gray-600 rounded px-4 py-3 text-white placeholder-gray-400 focus:border-white focus:outline-none">
+                                <input type="email" placeholder="Email" 
+                                       class="w-full bg-black border border-gray-600 rounded px-4 py-3 text-white placeholder-gray-400 focus:border-white focus:outline-none">
+                                <input type="tel" placeholder="Телефон" 
+                                       class="w-full bg-black border border-gray-600 rounded px-4 py-3 text-white placeholder-gray-400 focus:border-white focus:outline-none">
+                                <textarea rows="4" placeholder="Повідомлення" 
+                                          class="w-full bg-black border border-gray-600 rounded px-4 py-3 text-white placeholder-gray-400 focus:border-white focus:outline-none resize-none"></textarea>
+                                <button class="w-full bg-white text-black py-3 rounded font-semibold hover:bg-gray-200 transition-colors">
+                                    Надіслати
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column (30%) -->
+                <div class="right-column bg-black p-8 flex flex-col justify-center">
+                    <h3 class="text-xl font-semibold mb-6">Контактна інформація</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="phone" class="w-5 h-5 text-gray-400"></i>
+                            <div>
+                                <p class="font-semibold">Телефон</p>
+                                <p class="text-gray-300">+380 123 456 789</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="mail" class="w-5 h-5 text-gray-400"></i>
+                            <div>
+                                <p class="font-semibold">Email</p>
+                                <p class="text-gray-300">hello@photoart.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="instagram" class="w-5 h-5 text-gray-400"></i>
+                            <div>
+                                <p class="font-semibold">Instagram</p>
+                                <p class="text-gray-300">@photoart_studio</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <i data-lucide="facebook" class="w-5 h-5 text-gray-400"></i>
+                            <div>
+                                <p class="font-semibold">Facebook</p>
+                                <p class="text-gray-300">PhotoArt Studio</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-800">
+                        <h4 class="font-semibold mb-3">Чому саме ми?</h4>
+                        <ul class="text-sm text-gray-300 space-y-2">
+                            <li>• 8+ років професійного досвіду</li>
+                            <li>• 500+ задоволених клієнтів</li>
+                            <li>• Індивідуальний підхід до кожного</li>
+                            <li>• Сучасне обладнання</li>
+                            <li>• Швидка обробка фотографій</li>
+                            <li>• Гарантія якості</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black border-t border-gray-800 py-3 px-6">
+        <div class="flex justify-between items-center">
+            <!-- Copyright -->
+            <div class="text-sm text-gray-400">
+                © 2025 PhotoArt Studio. Всі права захищені.
+            </div>
+            
+            <!-- Social Media Icons -->
+            <div class="flex space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="instagram" class="w-5 h-5"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="facebook" class="w-5 h-5"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="twitter" class="w-5 h-5"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="youtube" class="w-5 h-5"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                    <i data-lucide="linkedin" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bio Modal -->
+    <div id="bio-modal" class="fixed inset-0 bg-black z-50 hidden">
+        <div class="h-full flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-800">
+                <h3 class="text-xl font-bold">Галерея фотографа</h3>
+                <button onclick="closeBioModal()" class="text-white hover:text-gray-300">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center">
+                <img id="bio-modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
+            </div>
+            
+            <div class="p-4 border-t border-gray-800">
+                <div id="bio-modal-thumbnails" class="flex justify-center space-x-2 flex-wrap">
+                    <!-- Bio thumbnails will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Gallery Modal -->
+    <div id="home-modal" class="fixed inset-0 bg-black z-50 hidden">
+        <div class="h-full flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-800">
+                <h3 class="text-xl font-bold">Галерея робіт</h3>
+                <button onclick="closeHomeModal()" class="text-white hover:text-gray-300">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center">
+                <img id="home-modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
+            </div>
+            
+            <div class="p-4 border-t border-gray-800">
+                <div id="home-modal-thumbnails" class="flex justify-center space-x-2 flex-wrap">
+                    <!-- Home thumbnails will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Portfolio Modal -->
+    <div id="portfolio-modal" class="fixed inset-0 bg-black z-50 hidden">
+        <div class="h-full flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-800">
+                <h3 id="portfolio-modal-title" class="text-xl font-bold"></h3>
+                <div class="flex items-center space-x-4">
+                    <span id="portfolio-modal-price" class="text-lg font-bold"></span>
+                    <button onclick="addCurrentToCart()" class="bg-white text-black px-4 py-2 rounded hover:bg-gray-200 transition-colors">
+                        Додати в корзину
+                    </button>
+                    <button onclick="closePortfolioModal()" class="text-white hover:text-gray-300">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center">
+                <img id="portfolio-modal-image" src="" alt="" class="max-w-full max-h-full object-contain">
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center">
+        <div class="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden m-4">
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Корзина покупок</h3>
+                <button onclick="toggleCart()" class="text-white hover:text-gray-300">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 max-h-96 overflow-y-auto">
+                <div id="cart-items">
+                    <!-- Cart items will be populated by JavaScript -->
+                </div>
+                <div id="empty-cart" class="text-center py-8 text-gray-400">
+                    <i data-lucide="shopping-cart" class="w-16 h-16 mx-auto mb-4 text-gray-600"></i>
+                    <p>Ваша корзина порожня</p>
+                </div>
+            </div>
+            
+            <div id="cart-footer" class="p-6 border-t border-gray-800 hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg">Загальна сума:</span>
+                    <span id="cart-total" class="text-xl font-bold">$0</span>
+                </div>
+                <button class="w-full bg-white text-black py-3 rounded font-semibold hover:bg-gray-200 transition-colors">
+                    Оформити замовлення
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Portfolio data
+        const portfolioImages = [
+            { id: 1, category: 'portrait', src: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1200&h=800&fit=crop', title: 'Елегантний портрет', price: 50, description: 'Професійний портрет у студії з м\'яким освітленням' },
+            { id: 2, category: 'wedding', src: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&h=800&fit=crop', title: 'Весільна церемонія', price: 75, description: 'Чарівний момент весільної церемонії' },
+            { id: 3, category: 'nature', src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop', title: 'Гірський пейзаж', price: 40, description: 'Захоплюючий вид на гірські вершини' },
+            { id: 4, category: 'portrait', src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop', title: 'Художній портрет', price: 60, description: 'Креативний портрет з художнім освітленням' },
+            { id: 5, category: 'wedding', src: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1200&h=800&fit=crop', title: 'Весільні емоції', price: 65, description: 'Щирі емоції молодят у день весілля' },
+            { id: 6, category: 'nature', src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=800&fit=crop', title: 'Лісова стежка', price: 35, description: 'Таємнича стежка крізь густий ліс' },
+        ];
+
+        // Home gallery images (reduced set for performance)
+        const homeImages = [
+            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1519741497674-611481863552?w=300&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=450&fit=crop',
+            'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=350&fit=crop',
+            'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=250&fit=crop',
+            'https://images.unsplash.com/photo-1494790108755-2616c16eff1e?w=300&h=350&fit=crop',
+            'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1509909756405-be0199881695?w=300&h=450&fit=crop',
+            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=300&h=350&fit=crop',
+            'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=300&h=250&fit=crop',
+            'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?w=300&h=350&fit=crop',
+            'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=300&h=450&fit=crop',
+            'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=250&fit=crop',
+            'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1493612276216-ee3925520721?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?w=300&h=350&fit=crop',
+        ];
+
+        // Bio gallery images (8 images as requested)
+        const bioImages = [
+            'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=250&fit=crop',
+            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=350&fit=crop',
+            'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=300&h=300&fit=crop',
+            'https://images.unsplash.com/photo-1494790108755-2616c16eff1e?w=300&h=450&fit=crop',
+            'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=300&fit=crop'
+        ];
+
+        let currentPortfolioIndex = 0;
+        let currentFilter = 'all';
+        let cart = [];
+        let filteredImages = [...portfolioImages];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            renderHomeGallery();
+            renderBioGallery();
+            renderThumbnails();
+            updateImageInfo();
+        });
+
+        // Render home gallery
+        function renderHomeGallery() {
+            const grid = document.querySelector('.masonry-grid');
+            
+            homeImages.forEach((src, index) => {
+                const heights = [200, 250, 300, 350, 400, 450];
+                const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+                
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Gallery ${index + 1}`;
+                img.className = 'masonry-item w-full object-cover';
+                img.style.height = randomHeight + 'px';
+                img.onclick = () => openHomeModal(index);
+                
+                grid.appendChild(img);
+            });
+        }
+
+        // Render bio gallery
+        function renderBioGallery() {
+            const grid = document.querySelector('.bio-masonry-grid');
+            
+            bioImages.forEach((src, index) => {
+                const heights = [200, 250, 300, 350, 400];
+                const randomHeight = heights[Math.floor(Math.random() * heights.length)];
+                
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = `Bio ${index + 1}`;
+                img.className = 'masonry-item w-full object-cover cursor-pointer hover:scale-105 transition-transform';
+                img.style.height = randomHeight + 'px';
+                img.onclick = () => openBioModal(index);
+                
+                grid.appendChild(img);
+            });
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionName).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+        }
+
+        // Portfolio functions
+        function filterPortfolio(category) {
+            currentFilter = category;
+            filteredImages = category === 'all' ? [...portfolioImages] : portfolioImages.filter(img => img.category === category);
+            currentPortfolioIndex = 0;
+            
+            document.querySelectorAll('.portfolio-filter').forEach(btn => {
+                btn.classList.remove('active-filter');
+                btn.classList.add('border-gray-600');
+            });
+            event.target.classList.add('active-filter');
+            event.target.classList.remove('border-gray-600');
+            
+            renderThumbnails();
+            updateImageInfo();
+        }
+
+        function renderThumbnails() {
+            const carousel = document.getElementById('thumbnail-carousel');
+            carousel.innerHTML = filteredImages.map((image, index) => `
+                <img src="${image.src}" 
+                     alt="${image.title}"
+                     class="thumbnail w-16 h-12 object-cover ${index === currentPortfolioIndex ? 'active' : ''}"
+                     onclick="selectImage(${index})">
+            `).join('');
+        }
+
+        function selectImage(index) {
+            currentPortfolioIndex = index;
+            updateImageInfo();
+            
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+        }
+
+        function updateImageInfo() {
+            const currentImage = filteredImages[currentPortfolioIndex];
+            if (!currentImage) return;
+            
+            document.getElementById('main-portfolio-image').src = currentImage.src;
+            document.getElementById('image-title').textContent = currentImage.title;
+            document.getElementById('image-description').textContent = currentImage.description;
+            document.getElementById('image-price').textContent = `${currentImage.price}`;
+            document.getElementById('image-category').textContent = getCategoryName(currentImage.category);
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'portrait': 'Портрет',
+                'wedding': 'Весілля',
+                'nature': 'Природа'
+            };
+            return names[category] || category;
+        }
+
+        function scrollCarousel(direction) {
+            if (direction === 'left' && currentPortfolioIndex > 0) {
+                selectImage(currentPortfolioIndex - 1);
+            } else if (direction === 'right' && currentPortfolioIndex < filteredImages.length - 1) {
+                selectImage(currentPortfolioIndex + 1);
+            }
+        }
+
+        // Home modal functions
+        function openHomeModal(index) {
+            document.getElementById('home-modal').classList.remove('hidden');
+            document.getElementById('home-modal-image').src = homeImages[index];
+            
+            const thumbnailsContainer = document.getElementById('home-modal-thumbnails');
+            thumbnailsContainer.innerHTML = homeImages.map((src, i) => `
+                <img src="${src}" 
+                     alt="Home ${i + 1}"
+                     class="w-16 h-12 object-cover cursor-pointer m-1 ${i === index ? 'border-2 border-white' : ''}"
+                     onclick="changeHomeModalImage(${i})">
+            `).join('');
+        }
+
+        function changeHomeModalImage(index) {
+            document.getElementById('home-modal-image').src = homeImages[index];
+            
+            document.querySelectorAll('#home-modal-thumbnails img').forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('border-2', 'border-white');
+                } else {
+                    thumb.classList.remove('border-2', 'border-white');
+                }
+            });
+        }
+
+        function closeHomeModal() {
+            document.getElementById('home-modal').classList.add('hidden');
+        }
+
+        // Bio modal functions
+        function openBioModal(index) {
+            document.getElementById('bio-modal').classList.remove('hidden');
+            document.getElementById('bio-modal-image').src = bioImages[index];
+            
+            const thumbnailsContainer = document.getElementById('bio-modal-thumbnails');
+            thumbnailsContainer.innerHTML = bioImages.map((src, i) => `
+                <img src="${src}" 
+                     alt="Bio ${i + 1}"
+                     class="w-16 h-12 object-cover cursor-pointer m-1 ${i === index ? 'border-2 border-white' : ''}"
+                     onclick="changeBioModalImage(${i})">
+            `).join('');
+        }
+
+        function changeBioModalImage(index) {
+            document.getElementById('bio-modal-image').src = bioImages[index];
+            
+            document.querySelectorAll('#bio-modal-thumbnails img').forEach((thumb, i) => {
+                if (i === index) {
+                    thumb.classList.add('border-2', 'border-white');
+                } else {
+                    thumb.classList.remove('border-2', 'border-white');
+                }
+            });
+        }
+
+        function closeBioModal() {
+            document.getElementById('bio-modal').classList.add('hidden');
+        }
+
+        function openPortfolioModal() {
+            const currentImage = filteredImages[currentPortfolioIndex];
+            document.getElementById('portfolio-modal').classList.remove('hidden');
+            document.getElementById('portfolio-modal-image').src = currentImage.src;
+            document.getElementById('portfolio-modal-title').textContent = currentImage.title;
+            document.getElementById('portfolio-modal-price').textContent = `${currentImage.price}`;
+        }
+
+        function closePortfolioModal() {
+            document.getElementById('portfolio-modal').classList.add('hidden');
+        }
+
+        // Cart functions
+        function addCurrentToCart() {
+            const currentImage = filteredImages[currentPortfolioIndex];
+            const existingItem = cart.find(item => item.id === currentImage.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...currentImage, quantity: 1 });
+            }
+            
+            updateCartDisplay();
+            
+            // Visual feedback
+            const button = event.target;
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-6 h-6"></i>';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                lucide.createIcons();
+            }, 1000);
+        }
+
+        function removeFromCart(imageId) {
+            cart = cart.filter(item => item.id !== imageId);
+            updateCartDisplay();
+        }
+
+        function updateQuantity(imageId, newQuantity) {
+            if (newQuantity === 0) {
+                removeFromCart(imageId);
+            } else {
+                const item = cart.find(item => item.id === imageId);
+                if (item) {
+                    item.quantity = newQuantity;
+                    updateCartDisplay();
+                }
+            }
+        }
+
+        function updateCartDisplay() {
+            const cartCount = document.getElementById('cart-count');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            if (totalItems > 0) {
+                cartCount.textContent = totalItems;
+                cartCount.classList.remove('hidden');
+            } else {
+                cartCount.classList.add('hidden');
+            }
+            
+            renderCartItems();
+        }
+
+        function renderCartItems() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyCart = document.getElementById('empty-cart');
+            const cartFooter = document.getElementById('cart-footer');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '';
+                emptyCart.classList.remove('hidden');
+                cartFooter.classList.add('hidden');
+            } else {
+                emptyCart.classList.add('hidden');
+                cartFooter.classList.remove('hidden');
+                
+                const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                document.getElementById('cart-total').textContent = `${totalPrice}`;
+                
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="flex items-center space-x-4 p-4 border-b border-gray-800 last:border-b-0">
+                        <img src="${item.src}" alt="${item.title}" class="w-16 h-12 object-cover">
+                        <div class="flex-1">
+                            <h4 class="font-semibold">${item.title}</h4>
+                            <p class="text-sm text-gray-400">${item.price}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" 
+                                    class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">
+                                <i data-lucide="minus" class="w-4 h-4"></i>
+                            </button>
+                            <span class="w-8 text-center">${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" 
+                                    class="w-8 h-8 bg-gray-700 rounded flex items-center justify-center hover:bg-gray-600">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" 
+                                class="text-red-400 hover:text-red-300 p-2">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `).join('');
+                
+                lucide.createIcons();
+            }
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('bio-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeBioModal();
+            }
+        });
+
+        document.getElementById('home-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHomeModal();
+            }
+        });
+
+        document.getElementById('portfolio-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePortfolioModal();
+            }
+        });
+
+        document.getElementById('cart-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleCart();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeBioModal();
+                closeHomeModal();
+                closePortfolioModal();
+                if (!document.getElementById('cart-modal').classList.contains('hidden')) {
+                    toggleCart();
+                }
+            }
+            
+            if (document.getElementById('portfolio').classList.contains('active')) {
+                if (e.key === 'ArrowLeft') {
+                    scrollCarousel('left');
+                } else if (e.key === 'ArrowRight') {
+                    scrollCarousel('right');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
